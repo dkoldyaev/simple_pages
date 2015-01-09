@@ -3,14 +3,9 @@ __author__ = 'dkoldyaev'
 from django.db import models
 
 from simple_pages.models import AbstractModel
+from text_part.models import TextPart
 
 from .managers import PageQuerySet
-
-PAGE_PART_TEMPLATES = (
-    ('text',        'Text',         ['text_text']),
-    # ('galery',      'Galery',       ['galery_photos']),
-    # ('image',       'Single Image', ['image_image'])
-)
 
 class Page(AbstractModel) :
 
@@ -23,11 +18,10 @@ class Page(AbstractModel) :
     meta_description =  models.TextField(blank=True, null=True)
     meta_keywords =     models.TextField(blank=True, null=True)
 
-class PageTextPart(AbstractModel) :
+class PageTextPart(TextPart) :
 
-    type =              models.CharField(blank=False, null=False, max_length=255, choices=PAGE_PART_TEMPLATES),
+    page =              models.ForeignKey('page.Page', blank=False, null=False)
 
-    text_text =        models.TextField(blank=True, null=True)
+    class Meta:
 
-    # galery_header =    models.CharField(blank=True, null=True, max_length=255)
-    # galery_photos =    models.ManyToManyField('photo.Photo', blank=True, null=True)
+        ordering = ['-order']

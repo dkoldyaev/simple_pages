@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for simple_pages project.
 
@@ -30,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
+    'suit',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +43,7 @@ INSTALLED_APPS = (
     'simple_pages',
     'page',
     'photo',
+    'text_part',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -50,6 +54,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+
+TEMPLATE_CONTEXT_PROCESSORS = TCP + (
+    'django.core.context_processors.request',
 )
 
 ROOT_URLCONF = 'simple_pages.urls'
@@ -70,7 +80,7 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -87,3 +97,13 @@ SAFE_DELETE = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'www', 'static')
+
+SUIT_CONFIG = {
+    'HEADER_DATE_FORMAT': 'l, j. F Y', # Saturday, 16th March 2013
+    'HEADER_TIME_FORMAT': 'H:i',       # 18:42
+
+    'MENU': (
+        {'app':'page', 'label':u'Текстовые страницы'},
+    )
+}
