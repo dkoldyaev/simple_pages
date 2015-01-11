@@ -1,4 +1,6 @@
 {% load i18n admin_static admin_modify %}
+{% load vardump %}
+{% load break_continue %}
 <div class="inline-group {{ inline_admin_formset.opts.suit_classes }}"
      id="{{ inline_admin_formset.formset.prefix }}-group">
     <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
@@ -8,49 +10,168 @@
             {{ inline_admin_formset.formset.non_form_errors }}
             <table class="table table-bordered table-condensed table-striped">
                 <thead>
-                    <tr>
-                        <th>&nbsp;</th>
-                        {% if inline_admin_formset.formset.can_delete %}
-                            <th>{% trans "Delete?" %}</th>
-                        {% endif %}
-                    </tr>
+                <tr>
+                    <th>Шаблон</th>
+                    <th>Сортировка</th>
+                    <th>&nbsp;</th>
+                    {% if inline_admin_formset.formset.can_delete %}
+                        <th>{% trans "Delete?" %}</th>
+                    {% endif %}
+                </tr>
                 </thead>
 
                 <tbody>
                 {% for inline_admin_form in inline_admin_formset %}
-                    {% with suit_tab_prefix=forloop.counter %}
+
+                    {% if inline_admin_form.form.non_field_errors %}
                         <tr>
-                            <td>
-                                <ul id="suit_inline_form_tabs_{{ forloop.counter }}" class="nav nav-tabs nav-tabs-suit" data-tab-prefix="suit_inline_form_tabs_{{ suit_tab_prefix }}">
-                                    {% for fieldset_label, fieldset_data in inline_admin_formset.fieldsets %}
-                                        <li><a href="#{{ fieldset_label }}">{{ fieldset_label }}</a></li>
+                            <td colspan="{{ inline_admin_form|cell_count }}">
+                                <div class="control-group error">
+                                    <div class="help-block">{{ inline_admin_form.form.non_field_errors }}</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    <tr class="form-row {% cycle "row1" "row2" %} {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last %} empty-form{% endif %}"
+                        id="{{ inline_admin_formset.formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
+
+                        {% for fieldset in inline_admin_form %}
+
+                                {% for line in fieldset %}
+                                    {% for field in line %}
+                                        {% if field.field.name == inline_admin_formset.formset.tab_field %}
+
+                                            <td class="tab_cols_switch">
+                                                {{ field.field }}
+                                            </td>
+
+                                        {% endif %}
                                     {% endfor %}
-                                </ul>
-
-                                {% for fieldset_label, fieldset_data in inline_admin_formset.fieldsets %}
-
-                                    <div class="tab-content suit_inline_form_tabs_{{ suit_tab_prefix }} suit_inline_form_tabs_{{ suit_tab_prefix }}-{{ fieldset_label }}">
-                                        {% for fieldset in inline_admin_form %}
-                                            {% for line in fieldset %}
-                                                {% for field in line %}
-
-                                                    {% if field.field.name in fieldset_data.fields %}
-                                                        {{ field.field }}
-                                                    {% endif %}
-
-                                                {% endfor %}
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </div>
-
                                 {% endfor %}
 
-                            </td>
-                            {% if inline_admin_formset.formset.can_delete %}
-                                <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
-                            {% endif %}
-                        </tr>
-                    {% endwith %}
+                                {% for line in fieldset %}
+                                    {% for field in line %}
+                                        {% if field.field.name == inline_admin_formset.formset.sorted_field %}
+
+                                            <td>
+                                                {{ field.field }}
+                                            </td>
+
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+
+                        {% endfor %}
+
+                        <td>
+
+                            <table class="tab_cols_table">
+
+                                <tr>
+
+                                    {% for fieldset in inline_admin_form %}
+
+                                        {% for line in fieldset %}
+
+                                            {% for field in line %}
+
+                                                {% if field.field.name != inline_admin_formset.formset.tab_field and field.field.name != inline_admin_formset.formset.sorted_field %}
+
+                                                    <th class="{% if field.field.name %}{% spaceless %}
+                                                            field-{{ field.field.name }}
+                                                            {{ field.field.errors|yesno:' control-group error,' }}{% endspaceless %}{% endif %} template-{{ fieldset.name }}">
+
+                                                        {{ field.field.label }}
+
+                                                    </th>
+
+                                                {% endif %}
+
+                                            {% endfor %}
+
+                                        {% endfor %}
+
+                                    {% endfor %}
+
+                                </tr>
+
+                                <tr>
+
+                                    {% for fieldset in inline_admin_form %}
+
+                                        {% for line in fieldset %}
+
+                                            {% for field in line %}
+
+                                                {% if field.field.name != inline_admin_formset.formset.tab_field and field.field.name != inline_admin_formset.formset.sorted_field %}
+
+                                                    <td class="{% if field.field.name %}{% spaceless %}
+                                                            field-{{ field.field.name }}
+                                                            {{ field.field.errors|yesno:' control-group error,' }}{% endspaceless %}{% endif %} template-{{ fieldset.name }}">
+
+                                                        {% if forloop.parentloop.first %}
+
+                                                            {% if inline_admin_form.has_auto_field or inline_admin_form.needs_explicit_pk_field %}
+
+                                                                {{ inline_admin_form.pk_field.field }}
+
+                                                            {% endif %}
+
+                                                            {{ inline_admin_form.fk_field.field }}
+
+                                                            {% spaceless %}
+
+                                                                {% for fieldset in inline_admin_form %}
+                                                                    {% for line in fieldset %}
+                                                                        {% for field in line %}
+
+                                                                            {% if field.is_hidden %} {{ field.field }} {% endif %}
+
+                                                                        {% endfor %}
+                                                                    {% endfor %}
+                                                                {% endfor %}
+
+                                                            {% endspaceless %}
+
+                                                        {% endif %}
+
+                                                        {% block field_content %}
+                                                            {% if field.is_readonly %}
+                                                                <p>{{ field.contents }}</p>
+                                                            {% else %}
+                                                                {% if field.field.errors %}
+                                                                    <div class="help-block">
+                                                                        {{ field.field.errors.as_ul }}
+                                                                    </div>
+                                                                {% endif %}
+                                                                {{ field.field }}
+                                                            {% endif %}
+                                                        {% endblock %}
+
+                                                    </td>
+
+                                                {% endif %}
+
+                                            {% endfor %}
+
+                                        {% endfor %}
+
+                                    {% endfor %}
+
+
+
+
+                                </tr>
+                            </table>
+
+                        </td>
+
+                        {% if inline_admin_formset.formset.can_delete %}
+                            <td class="delete">{% if inline_admin_form.original %}
+                                {{ inline_admin_form.deletion_field.field }}{% endif %}</td>
+                        {% endif %}
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>
@@ -60,15 +181,31 @@
 
 <script type="text/javascript">
     (function ($) {
-        $(document).ready(function ($) {
 
-            {% for inline_admin_form in inline_admin_formset %}
-                (function ($) {
-                    $(function () {
-                        $('#suit_inline_form_tabs_{{ forloop.counter }}').suit_form_tabs();
-                    });
-                }(Suit.$))
-            {% endfor %}
+        $('#{{ inline_admin_formset.formset.prefix }}-group .tab_cols_switch')
+            .find('input, select')
+            .on(
+                    'change',
+                    function(event){
+
+                        var selector =  $(this);
+                        var row = selector.parents('.form-row');
+
+                        changeTemplate(row, selector.val());
+
+                    }
+            )
+            .change();
+
+        function changeTemplate(inlineRow, template){
+
+            var table = inlineRow.find('.tab_cols_table')
+
+            table.find('th, td').hide()
+            table.find('.template-'+template).show();
+        }
+
+        $(document).ready(function ($) {
 
             var rows = "#{{ inline_admin_formset.formset.prefix }}-group .tabular.inline-related tbody tr";
             var alternatingRows = function (row) {
@@ -128,5 +265,14 @@
                 })
             });
         });
+
+        $('.tab_cols_table .add-row').remove();
+
     })(django.jQuery);
+
 </script>
+<style type="text/css">
+    .tab_cols_table .add-row {
+        display: none;
+    }
+</style>
