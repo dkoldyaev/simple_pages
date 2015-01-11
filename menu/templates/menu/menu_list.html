@@ -1,0 +1,7 @@
+<ul>
+    {% for menu_item in menu_items %}
+        <li>
+            <a href="{{ menu_item.path }}">{{ menu_item.text }}</a>
+        </li>
+    {% endfor %}
+</ul>

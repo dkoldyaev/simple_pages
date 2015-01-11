@@ -1,0 +1,5 @@
+<div style="display: block; overflow:hidden; width: 80%;">
+    {% with text_part=text_part template=text_part.template %}
+        {% include 'text_part/templates/'|add:template|add:'.html' %}
+    {% endwith %}
+</div>

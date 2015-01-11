@@ -7,7 +7,7 @@ class AbstractQuerySet(QuerySet) :
 
     def get(self, *args, **kwargs):
 
-        return self.filter(*args, **kwargs).get()
+        return super(AbstractQuerySet, self.filter(*args, **kwargs)).get()
 
     def filter(self, *args, **kwargs):
 

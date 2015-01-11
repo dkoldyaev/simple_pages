@@ -31,7 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
+
     'suit',
+    'debug_toolbar',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,6 +46,8 @@ INSTALLED_APPS = (
     'page',
     'photo',
     'text_part',
+    'menu',
+
 )
 
 MIDDLEWARE_CLASSES = (
@@ -54,17 +58,23 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
+
+    'menu.context_processors.menu_items',
 )
 
 ROOT_URLCONF = 'simple_pages.urls'
 
 WSGI_APPLICATION = 'simple_pages.wsgi.application'
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 
 # Database
@@ -92,9 +102,14 @@ USE_TZ = True
 
 SAFE_DELETE = True
 
+INTERNAL_IPS = ('127.0.0.1', '::1')
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'www', 'media')
+MEDIA_URL = '/media/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'www', 'static')
@@ -105,5 +120,6 @@ SUIT_CONFIG = {
 
     'MENU': (
         {'app':'page', 'label':u'Текстовые страницы'},
+        {'app':'menu', 'label':u'Меню'},
     )
 }

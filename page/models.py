@@ -18,6 +18,20 @@ class Page(AbstractModel) :
     meta_description =  models.TextField(blank=True, null=True)
     meta_keywords =     models.TextField(blank=True, null=True)
 
+    @property
+    def text_parts(self):
+
+        return PageTextPart.objects.filter(page_id=self.id)
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug or self.slug.strip() == '' :
+
+            from pytils.translit import slugify
+            self.slug = slugify(self.name)
+
+        super(Page, self).save(*args, **kwargs)
+
 class PageTextPart(TextPart) :
 
     page =              models.ForeignKey('page.Page', blank=False, null=False)
